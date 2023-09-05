@@ -26,8 +26,7 @@ class RedisClient {
   
     async set(key, value, duration) {
       // stores a value in Redis with an expiration
-      const result = await this.client.set(key, value, 'EX', duration);
-        return result;
+      this.client.setex(key, duration, value);
     }
   
     async del(key) {
