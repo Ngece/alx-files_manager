@@ -1,5 +1,5 @@
 // Redis client module
-const redis = require('redis');
+import redis from 'redis';
 
 class RedisClient {
     constructor() {
