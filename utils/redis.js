@@ -5,6 +5,7 @@ class RedisClient {
     constructor() {
       // Redis client and handle any errors
       this.client = redis.createClient();
+      this.getAsync = promisify(this.client.get).bind(this.client);
       this.client.on('error', (error) => {
         console.error('Redis client error:', error);
       });
