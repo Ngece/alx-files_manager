@@ -28,7 +28,8 @@ router.post('/users', UsersController.postNew);
 // Define the /files endpoint
 router.post('/files', FilesController.postUpload);
 
-// Define the /files/:id endpoint
+// Define the Get and List endpoints
 router.get('/files/:id', FilesController.getShow);
+router.get('/files', FilesController.getIndex);
 
 module.exports = router;
