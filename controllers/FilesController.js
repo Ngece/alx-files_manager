@@ -4,6 +4,7 @@ const path = require('path');
 const mimeTypes = require('mime-types');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../utils/db');
+const fileQueue = require('../worker');
 
 class FilesController {
   static async postUpload(req, res) {
@@ -61,6 +62,12 @@ class FilesController {
 
       // Insert the new file document into the database
       await db.createFile(newFile);
+
+      // Check if the uploaded file is an image
+      if (type === 'image') {
+        // Enqueue a thumbnail generation task for the uploaded image
+        fileQueue.add({ userId: req.user.id, fileId: newFile.id });
+      }
 
       // Return the newly created file
       return res.status(201).json(newFile);
