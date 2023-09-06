@@ -31,12 +31,12 @@ class DBClient {
   // returns the number of files in the database
   async nbFiles() { return this.files.countDocuments(); }
 
-  async getUser(query) {
-    const user = await this.db.collection('users').findOne(query);
+  async getUserByEmailAndPassword(email, password) {
+    const user = await this.client.db('files_manager').collection('users').findOne({ email, password });
     return user;
   }
 }
 
-// exporting an instance of the DBClient class
+// exporting instance of the DBClient class
 const dbClient = new DBClient();
 module.exports = dbClient;
