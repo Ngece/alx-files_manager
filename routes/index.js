@@ -5,6 +5,7 @@ const router = express.Router();
 const AppController = require('../controllers/AppController');
 const AuthController = require('../controllers/AuthController');
 const UsersController = require('../controllers/UsersController');
+const FilesController = require('../controllers/FilesController');
 
 // The /status endpoint
 router.get('/status', AppController.getStatus);
@@ -20,5 +21,11 @@ router.get('/disconnect', AuthController.getDisconnect);
 
 // Define the /users/me endpoint
 router.get('/users/me', UsersController.getMe);
+
+// Define the /users endpoint
+router.post('/users', UsersController.postNew);
+
+// Define the /files endpoint
+router.post('/files', FilesController.postUpload);
 
 module.exports = router;
