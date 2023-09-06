@@ -131,6 +131,66 @@ class FilesController {
       return res.status(500).json({ message: 'Internal Server Error' });
     }
   }
+
+  static async putPublish(req, res) {
+    try {
+      // Extract user information from the request, including user ID and token
+      const userId = req.user.id;
+
+      // Extract file ID from the request parameters
+      const fileId = req.params.id;
+
+      // Check if the file exists and is accessible by the user
+      const file = await db.getFileById(fileId);
+
+      if (!file || file.userId !== userId) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Set the file as public
+      file.isPublic = true;
+
+      // Update the file in the database
+      await db.updateFile(file);
+
+      // Return the updated file
+      res.status(200).json(file);
+      return null;
+    } catch (error) {
+      console.error('Publish file error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  static async putUnpublish(req, res) {
+    try {
+      // Extract user information from the request, including user ID and token
+      const userId = req.user.id;
+
+      // Extract file ID from the request parameters
+      const fileId = req.params.id;
+
+      // Check if the file exists and is accessible by the user
+      const file = await db.getFileById(fileId);
+
+      if (!file || file.userId !== userId) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Set the file as not public
+      file.isPublic = false;
+
+      // Update the file in the database
+      await db.updateFile(file);
+
+      // Return the updated file
+      res.status(200).json(file);
+      return null;
+    } catch (error) {
+      console.error('Unpublish file error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
 }
 
 module.exports = FilesController;
