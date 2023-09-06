@@ -1,6 +1,7 @@
 // Import necessary modules
 const fs = require('fs');
 const path = require('path');
+const mimeTypes = require('mime-types');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../utils/db');
 
@@ -65,6 +66,68 @@ class FilesController {
       return res.status(201).json(newFile);
     } catch (error) {
       console.error('File upload error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  static async getShow(req, res) {
+    try {
+      // Extract user information from the request, including user ID and token
+      const userId = req.user.id;
+
+      // Extract file ID from the request parameters
+      const fileId = req.params.id;
+
+      // Check if the file exists and is accessible by the user
+      const file = await db.getFileById(fileId);
+
+      if (!file || (file.userId !== userId && !file.isPublic)) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      if (file.type === 'folder') {
+        return res.status(400).json({ message: 'A folder doesn\'t have content' });
+      }
+
+      // Get the MIME-type based on the file's name
+      const mimeType = mimeTypes.lookup(file.name);
+
+      // Determine the file path (local storage)
+      const filePath = file.localPath;
+
+      // Check if the file is not locally present
+      if (!filePath || !fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Return the file content with the correct MIME-type
+      res.setHeader('Content-Type', mimeType);
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+      return null;
+    } catch (error) {
+      console.error('Get file error:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  static async getIndex(req, res) {
+    try {
+      // Extract user information from the request, including user ID and token
+      const userId = req.user.id;
+
+      // Extract query parameters for pagination (page)
+      const page = parseInt(req.query.page, 10) || 0;
+      const pageSize = 20; // Number of items per page
+
+      // Query files based on user ID, with pagination
+      const files = await db.getFilesByUserId(userId, page, pageSize);
+
+      // Return the list of files
+      res.status(200).json(files);
+      return null;
+    } catch (error) {
+      console.error('List files error:', error);
       return res.status(500).json({ message: 'Internal Server Error' });
     }
   }
