@@ -2,9 +2,13 @@ const imageThumbnail = require('image-thumbnail');
 const Bull = require('bull');
 const path = require('path');
 const fs = require('fs');
+// Bull queue for sending welcome emails
+const welcomeEmailQueue = new Queue('welcomeEmailQueue');
+const Queue = require('bull');
+const nodemailer = require('nodemailer');
 const db = require('./utils/db');
 
-// Create a Bull queue for generating thumbnails
+// Bull queue for generating thumbnails
 const fileQueue = new Bull('fileQueue', {
   redis: {
     host: 'localhost', // Redis server host
@@ -67,4 +71,29 @@ fileQueue.process(async (job) => {
   storeThumbnails(fileId, thumbnail500, thumbnail250, thumbnail100);
 });
 
+// Process the queue
+welcomeEmailQueue.process(async (job) => {
+  const { userId, email } = job.data;
+
+  // Using nodemailer
+  const transporter = nodemailer.createTransport({
+    service: 'your_email_service_provider', // e.g., 'gmail'
+    auth: {
+      user: 'your_email@example.com',
+      pass: 'your_email_password',
+    },
+  });
+
+  const mailOptions = {
+    from: 'email@example.com',
+    to: email,
+    subject: 'Welcome to Our App',
+    text: 'Welcome to our app! We are excited to have you on board.',
+  };
+
+  // Send the email
+  await transporter.sendMail(mailOptions);
+});
+
+module.exports = welcomeEmailQueue;
 module.exports = fileQueue;
