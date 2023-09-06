@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Load all routes from the file routes/index.js
-const routes = require('./routes');
+const routes = require('./routes/index');
 
 app.use('/', routes);
 
